@@ -1,5 +1,6 @@
 local M = {}
 
+-- deafults that will be merged by the user config (user priority duh)
 M.defaults = {
 	-- enable the plugin by default
 	enabled = true,
@@ -8,12 +9,12 @@ M.defaults = {
 	identifiers = { "err" },
 
 	-- virtual text structure for a collapsed error handling block
-	-- format: prefix + [content + content_separator] + return_character + suffix
+	-- formatted will be: prefix + content + content_separator + return_character + suffix
 	virtual_text = {
-		prefix = " ", -- What comes before the content
-		content_separator = " ", -- Space between content and return character (only used if content exists)
-		return_character = "󱞿 ", -- The icon/character showing it's a return
-		suffix = "", -- What comes at the end
+		prefix = " ",
+		content_separator = " ",
+		return_character = "󱞿 ",
+		suffix = "",
 	},
 
 	highlight_group = "NoGoZone",

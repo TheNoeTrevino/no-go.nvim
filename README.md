@@ -28,7 +28,12 @@ TODO: add photos
   "noetrevino/no-go.nvim",
   dependencies = { "nvim-treesitter/nvim-treesitter" },
   ft = "go",
-  -- look at default config below for customization options
+  opts = {
+    -- Your configuration here (optional)
+    -- lazy.nvim automatically calls setup() with the opts property
+    identifiers = { "err", "error" }, -- Customize which identifiers to collapse
+    -- look at the default config for more details
+  },
 }
 ```
 
@@ -36,8 +41,10 @@ TODO: add photos
 
 ### Default Configuration
 
+The default follows Jetbrains GoLand style:
+
 ```lua
-require("no-go").setup({
+require("no-go").setup({ -- required w/o lazy.nvim
   -- Enable the plugin behavior by default
   enabled = true,
 
@@ -99,19 +106,7 @@ The virtual text is dynamically built based on what's in the return statement. I
 
 The `reveal_on_cursor` feature automatically reveals concealed error handling blocks when you move your cursor to the `if err != nil` line. This allows you to inspect the actual error handling code without manually toggling concealment.
 
-TODO: add videos here
-
-```lua
--- Enable reveal on cursor (default)
-require("no-go").setup({
-  reveal_on_cursor = true,
-})
-
--- Disable reveal on cursor. Please read warning below!
-require("no-go").setup({
-  reveal_on_cursor = false,
-})
-```
+TODO: add videos here. Reveal cursor turned off and on.
 
 **How it works:**
 - When your cursor is on the `if err != nil` line, the concealed block below is revealed
@@ -128,15 +123,25 @@ require("no-go").setup({
 
 ## Commands
 
-The plugin provides user commands rather than key mappings:
+The plugin provides user commands, rather than keymappings. You can of course do
+that yourself. Here are the commands and how they interact with each other:
 
-- `:NoGoRefresh` - Manually refresh the current buffer
-- `:NoGoToggle` - Toggle error collapsing for the current buffer
-- `:NoGoEnable` - Enable error collapsing for the current buffer
-- `:NoGoDisable` - Disable error collapsing for the current buffer
+### Global Commands (affect all buffers)
+
+- `:NoGoEnable` - Enable error collapsing globally (all Go buffers)
+- `:NoGoDisable` - Disable error collapsing globally (all Go buffers)
+- `:NoGoToggle` - Toggle error collapsing globally
+
+### Buffer-Specific Commands (affect only current buffer)
+
+- `:NoGoBufEnable` - Enable error collapsing for current buffer only
+- `:NoGoBufDisable` - Disable error collapsing for current buffer only
+- `:NoGoBufToggle` - Toggle error collapsing for current buffer only
 
 > [!NOTE]
-> Of course, you can always add your own mappings. 
+> **Hierarchy:** Global state overrides buffer-specific state. So, `NoGoDisable`
+> will set ALL buffers to disabled. But, if you then run `NoGoBufEnable` in a
+> specific buffer, it will enable the plugin only for that buffer.
 
 ## How It Works
 
@@ -146,9 +151,9 @@ The plugin uses Treesitter to parse your Go code and identify error handling pat
 2. The left side of the expression must be the identifier `err`, or whatever identifiers you have configured
 3. The consequence block must contain a `return` statement
 
-When all conditions are met, the plugin:
+When all conditions are met, the plugin will then:
 - Adds virtual text at the end of the `if` line
-- Hides the lines containing the error handling block
+- Hides the lines containing the error handling block (not fold)
 - Highlights the virtual text with the `NoGoZone` highlight group
 
 This approach ensures only standard Go error handling patterns are collapsed, avoiding false positives.
@@ -159,7 +164,9 @@ If you are interested in how the AST queries are structured, go over to one of
 the if statements that this plugin conceals. Run the command
 `:InspectTree`. It is actually quite neat!
 
+Try out writing some queries yourself with the `EditQuery` command. 
+
 ## TODO
 
 - [ ] Add command to toggle reveal on cursor
-- [ ] Add support for not operator. `if !ok {...`
+- [ ] Add support for the not operator. For stuff like: `if !ok {...`
