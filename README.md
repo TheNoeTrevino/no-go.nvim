@@ -5,6 +5,10 @@ Verbose error handling in Go? That's a no-go from me!
 A Neovim plugin that intelligently collapses Go error handling blocks into a single line,
 making your code more readable while keeping the semantics of error handling visible.
 
+## Before and After
+
+<img width="2191" height="1219" alt="before-after" src="https://github.com/user-attachments/assets/b41778f7-bf20-48d2-a0c3-bb3e4ed5589e" />
+
 ## Motivation
 
 Go's error handing is explicit and unmagical (awesome!), but it comes with being verbose, and has a tendency to create bloat in your code (sad!).
@@ -20,10 +24,6 @@ I knew I wanted to create something similar in Neovim.
 - Only collapses blocks where the variable is named `err`, or the user-defined identifiers
 - Customizable highlight colors and virtual text
 - Text concealment, no folding
-
-## Before and After
-
-<img width="2191" height="1219" alt="before-after" src="https://github.com/user-attachments/assets/b41778f7-bf20-48d2-a0c3-bb3e4ed5589e" />
 
 ## Requirements
 
