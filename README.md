@@ -11,7 +11,7 @@ making your code more readable while keeping the semantics of error handling vis
 
 ## Motivation
 
-Go's error handing is explicit and unmagical (awesome!), but it comes with being verbose, and has a tendency to create bloat in your code (sad!).
+Go's error handing is explicit and unmagical (awesome!), but that comes with verbosity a tendency to create bloat in your code (sad!).
 
 After doing research and finding from [this issue](https://github.com/golang/vscode-go/issues/2311) that GoLand has implemented their own solution, 
 I knew I wanted to create something similar in Neovim. 
