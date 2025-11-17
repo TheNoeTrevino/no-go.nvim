@@ -12,7 +12,7 @@ A Neovim plugin that intelligently collapses Go error handling blocks into a sin
 
 ## Before and After
 
-TODO: add photos
+TODO: add photos through github
 
 ## Requirements
 
@@ -41,8 +41,6 @@ TODO: add photos
 
 ### Default Configuration
 
-The default follows Jetbrains GoLand style:
-
 ```lua
 require("no-go").setup({ -- required w/o lazy.nvim
   -- Enable the plugin behavior by default
@@ -52,11 +50,11 @@ require("no-go").setup({ -- required w/o lazy.nvim
   -- Only collapse blocks where the identifier is in this list
   identifiers = { "err" },
 
-  -- Virtual text structure for collapsed error handling
+  -- Virtual text for collapsed error handling
   -- Built as: prefix + content + content_separator + return_character + suffix
-  -- Content is dynamically extracted from the return statement
+  -- The default follows Jetbrains GoLand style of concealment:
   virtual_text = {
-    prefix = " ",
+    prefix = ": ",
     content_separator = " ",
     return_character = "󱞿 ",
     suffix = "",
@@ -170,3 +168,5 @@ Try out writing some queries yourself with the `EditQuery` command.
 
 - [ ] Add command to toggle reveal on cursor
 - [ ] Add support for the not operator. For stuff like: `if !ok {...`
+- [ ] Link to a more default background, so colorschemes can set it
+- [ ] Add support for gin? 

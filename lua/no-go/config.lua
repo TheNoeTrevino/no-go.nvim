@@ -11,7 +11,7 @@ M.defaults = {
 	-- virtual text structure for a collapsed error handling block
 	-- formatted will be: prefix + content + content_separator + return_character + suffix
 	virtual_text = {
-		prefix = " ",
+		prefix = ": ",
 		content_separator = " ",
 		return_character = "󱞿 ",
 		suffix = "",
