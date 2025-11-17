@@ -18,7 +18,8 @@ M.disabled_buffers = {}
 -- Track buffers where the plugin is explicitly enabled (overrides global disabled state)
 M.enabled_buffers = {}
 
--- Setup the plugin
+--- Setup the plugin with user configuration
+--- @param user_config table|nil Optional user configuration to override defaults
 function M.setup(user_config)
 	-- Setup configuration
 	local opts = config.setup(user_config)
@@ -96,7 +97,7 @@ function M.setup(user_config)
 	M.initialized = true
 end
 
--- Manually refresh the current buffer
+--- Manually refresh the current buffer
 function M.refresh()
 	if not M.initialized then
 		vim.notify("no-go.nvim: Plugin not initialized. Call setup() first.", vim.log.levels.WARN)
@@ -109,7 +110,7 @@ end
 
 -- GLOBAL COMMANDS (affect all buffers)
 
--- Disable the plugin globally
+--- Disable the plugin globally (all Go buffers)
 function M.disable()
 	if not M.initialized then
 		return
@@ -132,7 +133,7 @@ function M.disable()
 	end
 end
 
--- Enable the plugin globally
+--- Enable the plugin globally (all Go buffers)
 function M.enable()
 	if not M.initialized then
 		vim.notify("no-go.nvim: Plugin not initialized. Call setup() first.", vim.log.levels.WARN)
@@ -153,7 +154,7 @@ function M.enable()
 	end
 end
 
--- Toggle the plugin globally
+--- Toggle the plugin globally (all Go buffers)
 function M.toggle()
 	if not M.initialized then
 		vim.notify("no-go.nvim: Plugin not initialized. Call setup() first.", vim.log.levels.WARN)
@@ -170,7 +171,7 @@ end
 
 -- BUFFER-SPECIFIC COMMANDS (affect only current buffer)
 
--- Disable the plugin for current buffer only
+--- Disable the plugin for current buffer only
 function M.disable_buffer()
 	if not M.initialized then
 		return
@@ -188,7 +189,7 @@ function M.disable_buffer()
 	fold.clear_extmarks(bufnr)
 end
 
--- Enable the plugin for current buffer only
+--- Enable the plugin for current buffer only
 function M.enable_buffer()
 	if not M.initialized then
 		vim.notify("no-go.nvim: Plugin not initialized. Call setup() first.", vim.log.levels.WARN)
@@ -208,7 +209,7 @@ function M.enable_buffer()
 	fold.process_buffer(bufnr, config.options)
 end
 
--- Toggle the plugin for current buffer only
+--- Toggle the plugin for current buffer only
 function M.toggle_buffer()
 	if not M.initialized then
 		vim.notify("no-go.nvim: Plugin not initialized. Call setup() first.", vim.log.levels.WARN)

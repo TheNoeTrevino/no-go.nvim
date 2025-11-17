@@ -46,6 +46,9 @@ M.defaults = {
 -- current configuration (will be merged with user config)
 M.options = {}
 
+--- Setup configuration by merging user config with defaults
+--- @param user_config table|nil Optional user configuration to override defaults
+--- @return table The merged configuration options
 function M.setup(user_config)
 	M.options = vim.tbl_deep_extend("force", M.defaults, user_config or {})
 	M.setup_highlight()
@@ -53,6 +56,7 @@ function M.setup(user_config)
 	return M.options
 end
 
+--- Setup the NoGoZone highlight group
 function M.setup_highlight()
 	local hl = M.options.highlight
 	local hl_def = {}

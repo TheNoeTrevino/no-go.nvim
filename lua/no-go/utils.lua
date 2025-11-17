@@ -1,6 +1,10 @@
 local M = {}
 
--- Check if a node is an identifier (from config)
+--- Check if a node represents a configured identifier (e.g., "err", "error")
+--- @param node TSNode|nil The treesitter node to check
+--- @param bufnr number The buffer number
+--- @param config table The plugin configuration
+--- @return boolean True if the node matches a configured identifier
 function M.is_configured_identifier(node, bufnr, config)
 	if not node then
 		return false
@@ -17,7 +21,10 @@ function M.is_configured_identifier(node, bufnr, config)
 	return false
 end
 
--- Find the pos of opening brace on the if line
+--- Find the position of the opening brace on the if line
+--- @param bufnr number The buffer number
+--- @param if_start_row number The row number of the if statement
+--- @return number|nil The column position of the opening brace (0-indexed), or nil if not found
 function M.find_opening_brace(bufnr, if_start_row)
 	local line = vim.api.nvim_buf_get_lines(bufnr, if_start_row, if_start_row + 1, false)[1]
 	if not line then
@@ -31,7 +38,10 @@ function M.find_opening_brace(bufnr, if_start_row)
 	return nil
 end
 
--- Find the pos of closing brace
+--- Find the position of the closing brace
+--- @param bufnr number The buffer number
+--- @param if_end_row number The row number of the closing brace
+--- @return number|nil The column position of the closing brace (0-indexed), or nil if not found
 function M.find_closing_brace(bufnr, if_end_row)
 	local line = vim.api.nvim_buf_get_lines(bufnr, if_end_row, if_end_row + 1, false)[1]
 	if not line then
@@ -49,8 +59,11 @@ function M.find_closing_brace(bufnr, if_end_row)
 	return brace_col
 end
 
--- Based on return contnet and config
--- Format: prefix + [content + content_separator] + return_character + suffix
+--- Build virtual text string based on return content and config
+--- Format: prefix + [content + content_separator] + return_character + suffix
+--- @param content string|nil The identifier from the return statement (e.g., "err"), or nil
+--- @param config table The plugin configuration
+--- @return string The formatted virtual text string
 function M.build_virtual_text(content, config)
 	local vtext = config.virtual_text
 	local result = vtext.prefix or " "
@@ -67,6 +80,11 @@ function M.build_virtual_text(content, config)
 	return result
 end
 
+--- Check if a line is concealed by an extmark
+--- @param bufnr number The buffer number
+--- @param row number The row number to check (0-indexed)
+--- @param namespace number The namespace ID
+--- @return boolean True if the line is concealed
 function M.is_line_concealed(bufnr, row, namespace)
 	-- get all extmarks in the buffer with our namespace
 	local marks = vim.api.nvim_buf_get_extmarks(bufnr, namespace, 0, -1, { details = true })

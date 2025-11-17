@@ -15,6 +15,8 @@ M.query_string = [[
             (identifier) @return_identifier)?)))) @collapse_block) @if_statement
 ]]
 
+--- Parse and return the Treesitter query for Go error handling patterns
+--- @return vim.treesitter.Query|nil The parsed query or nil if parsing fails
 function M.get_query()
 	local ok, query = pcall(vim.treesitter.query.parse, "go", M.query_string)
 	if not ok then
@@ -24,12 +26,18 @@ function M.get_query()
 	return query
 end
 
+--- Clear all extmarks in the specified buffer
+--- @param bufnr number The buffer number
 function M.clear_extmarks(bufnr)
 	vim.api.nvim_buf_clear_namespace(bufnr, M.namespace, 0, -1)
 end
 
--- Apply virtual text to replace the error handling block
--- return the identifier from the return statement (e.g., "err"), or nil if no identifier
+--- Apply virtual text and concealment to collapse an error handling block
+--- @param bufnr number The buffer number
+--- @param if_node TSNode The if statement node
+--- @param collapse_node TSNode The block node to collapse
+--- @param return_content string|nil The identifier from the return statement (e.g., "err"), or nil
+--- @param config table The plugin configuration
 function M.apply_collapse(bufnr, if_node, collapse_node, return_content, config)
 	local if_start_row, _, if_end_row, _ = if_node:range()
 
@@ -86,7 +94,8 @@ function M.apply_collapse(bufnr, if_node, collapse_node, return_content, config)
 	})
 end
 
--- Smart cursor movement that skips concealed lines
+--- Smart cursor movement that skips concealed lines
+--- @param direction string The direction to move ("up" or "down")
 function M.move_cursor_skip_concealed(direction)
 	local bufnr = vim.api.nvim_get_current_buf()
 	local cursor = vim.api.nvim_win_get_cursor(0)
@@ -129,7 +138,9 @@ function M.move_cursor_skip_concealed(direction)
 	end
 end
 
--- Setup buffer mappings to skip concealed lines
+--- Setup buffer mappings to skip concealed lines
+--- @param bufnr number The buffer number
+--- @param config table The plugin configuration
 function M.setup_keymaps(bufnr, config)
 	if not config.keymaps or config.keymaps == false then
 		return
@@ -156,7 +167,9 @@ function M.setup_keymaps(bufnr, config)
 	setup_key(config.keymaps.move_up, "up")
 end
 
--- Process buffer and apply collapses
+--- Process buffer and apply collapses to error handling blocks
+--- @param bufnr number|nil The buffer number (defaults to current buffer)
+--- @param config table The plugin configuration
 function M.process_buffer(bufnr, config)
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
 
