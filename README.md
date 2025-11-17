@@ -1,6 +1,16 @@
 # no-go.nvim
 
-A Neovim plugin that intelligently collapses Go error handling blocks into a single line, making your code more readable while keeping the error handling visible.
+Verbose error handling in Go? That's a no-go from me!
+
+A Neovim plugin that intelligently collapses Go error handling blocks into a single line,
+making your code more readable while keeping the semantics of error handling visible.
+
+## Motivation
+
+Go's error handing is explicit and unmagical (awesome!), but it comes with being verbose, and has a tendency to create bloat in your code (sad!).
+
+After doing research and finding from [this issue](https://github.com/golang/vscode-go/issues/2311) that GoLand has implemented their own solution, 
+I knew I wanted to create something similar in Neovim. 
 
 ## Features
 
@@ -9,10 +19,11 @@ A Neovim plugin that intelligently collapses Go error handling blocks into a sin
 - Shows collapsed blocks with customizable virtual text (`: err 󱞿 ` by default)
 - Only collapses blocks where the variable is named `err`, or the user-defined identifiers
 - Customizable highlight colors and virtual text
+- Text concealment, no folding
 
 ## Before and After
 
-TODO: add photos through github
+<img width="2191" height="1219" alt="before-after" src="https://github.com/user-attachments/assets/b41778f7-bf20-48d2-a0c3-bb3e4ed5589e" />
 
 ## Requirements
 
@@ -80,6 +91,7 @@ require("no-go").setup({ -- required w/o lazy.nvim
 
   -- Key mappings to skip over concealed lines
   -- The plugin automatically remaps these keys to skip concealed error blocks
+  -- If you want to set them to something else, you will have to set them here. Or false to disable 
   keymaps = {
     move_down = "j", -- Key to move down and skip concealed lines
     move_up = "k",   -- Key to move up and skip concealed lines
@@ -95,34 +107,42 @@ require("no-go").setup({ -- required w/o lazy.nvim
 
 The virtual text is dynamically built based on what's in the return statement. It's composed of four parts:
 - **prefix**: What comes before the content
-- **content**: The identifier from the return statement (e.g., `err` from `return err`)
-- **content_separator**: Space between content and return character (only added if content exists)
+- **content**: The identifier from the return statement ('err', or what you set in the opts)
+- **content_separator**: Space between content and return character
 - **return_character**: The icon/symbol indicating a return
 - **suffix**: What comes at the end
 
 ### Reveal on Cursor
 
-The `reveal_on_cursor` feature automatically reveals concealed error handling blocks when you move your cursor to the `if err != nil` line. This allows you to inspect the actual error handling code without manually toggling concealment.
+The `reveal_on_cursor` feature automatically reveals concealed error handling blocks when you move your cursor to the `if err != nil` line. 
+This allows you to inspect the actual error handling code without manually toggling concealment.
 
-TODO: add videos here. Reveal cursor turned off and on.
+https://github.com/user-attachments/assets/b27bc069-4459-437f-8f74-599ce738536f
+
+#### Reveal on Cursor Off (manual toggling)
+
+https://github.com/user-attachments/assets/b9e336c7-fedc-4847-8960-5b9a527dd050
 
 **How it works:**
 - When your cursor is on the `if err != nil` line, the concealed block below is revealed
 - You can move down into the revealed block and navigate around inside it
-- While your cursor is anywhere inside the block (from the `if` line to the closing `}`) it will, of course, stays revealed
+- While your cursor is anywhere inside the block (from the `if` line to the closing `}`) it will, of course, stay revealed
 - When you move the cursor completely outside the block, it will conceal again automatically
 - This gives you: compact view by default, detailed view when needed
 
 > [!WARNING]
-> PLEASE note that if you disable `reveal_on_cursor`, you MUST manually toggle concealment
+> PLEASE note that if you disable `reveal_on_cursor`, you MUST manually toggle concealment (like the video above)
 > using the provided commands to access the error handling!
-> Though, it is nice when you just want to view the happy path.
-
+> Though, it is nice when you only want to view the happy path.
 
 ## Commands
 
 The plugin provides user commands, rather than keymappings. You can of course do
-that yourself. Here are the commands and how they interact with each other:
+that yourself. The exception is `j` and `k`. If you don't provide those, these keys will be set
+to traverse the concealed text in an itelligent matter. If you are like myself and use `jkl;` instead of `hjkl`, 
+you will have to set your own keymaps.
+
+Here are the commands and how they interact with each other:
 
 ### Global Commands (affect all buffers)
 
@@ -139,24 +159,26 @@ that yourself. Here are the commands and how they interact with each other:
 > [!NOTE]
 > **Hierarchy:** Global state overrides buffer-specific state. So, `NoGoDisable`
 > will set ALL buffers to disabled. But, if you then run `NoGoBufEnable` in a
-> specific buffer, it will enable the plugin only for that buffer.
+> specific buffer, it will enable the plugin behavior, only for that buffer.
 
 ## How It Works
 
 The plugin uses Treesitter to parse your Go code and identify error handling patterns. It specifically looks for:
 
 1. An `if` statement with a binary expression (e.g., `err != nil`)
-2. The left side of the expression must be the identifier `err`, or whatever identifiers you have configured
+2. The left side of the expression must be the identifier `err`, or one of whatever identifiers you have passed into the config
 3. The consequence block must contain a `return` statement
 
 When all conditions are met, the plugin will then:
 - Adds virtual text at the end of the `if` line
-- Hides the lines containing the error handling block (not fold)
+- Hides the lines containing the error handling block using concealment (not folding)
 - Highlights the virtual text with the `NoGoZone` highlight group
 
 This approach ensures only standard Go error handling patterns are collapsed, avoiding false positives.
 
-### Look at The AST Yourself
+If you use a different variable name for your errors, refer to the configuration section. 
+
+### Look at the AST Yourself
 
 If you are interested in how the AST queries are structured, go over to one of
 the if statements that this plugin conceals. Run the command
