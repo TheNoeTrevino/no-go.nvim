@@ -18,9 +18,18 @@ M.query_string = [[
 --- Parse and return the Treesitter query for Go error handling patterns
 --- @return vim.treesitter.Query|nil The parsed query or nil if parsing fails
 function M.get_query()
+	local has_parser = pcall(vim.treesitter.language.inspect, "go")
+
 	local ok, query = pcall(vim.treesitter.query.parse, "go", M.query_string)
 	if not ok then
-		vim.notify("no-go.nvim: Failed to parse Treesitter query", vim.log.levels.ERROR)
+		if not has_parser then
+			vim.notify("no-go.nvim: Go parser not found. Install it with :TSInstall go", vim.log.levels.ERROR)
+		else
+			vim.notify(
+				"no-go.nvim: Failed to parse query. Try updating the parser with :TSUpdate go",
+				vim.log.levels.ERROR
+			)
+		end
 		return nil
 	end
 	return query
