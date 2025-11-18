@@ -47,7 +47,7 @@ vim.highlight.priorities.treesitter = 100 -- default is 100
 
 ```lua
 {
-  "noetrevino/no-go.nvim",
+  "TheNoeTrevino/no-go.nvim",
   dependencies = { "nvim-treesitter/nvim-treesitter" },
   ft = "go",
   opts = {
