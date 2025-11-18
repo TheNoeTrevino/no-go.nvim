@@ -44,10 +44,10 @@ end
 --- Apply virtual text and concealment to collapse an error handling block
 --- @param bufnr number The buffer number
 --- @param if_node TSNode The if statement node
---- @param collapse_node TSNode The block node to collapse
+--- @param _ TSNode The block node to collapse
 --- @param return_content string|nil The identifier from the return statement (e.g., "err"), or nil
 --- @param config table The plugin configuration
-function M.apply_collapse(bufnr, if_node, collapse_node, return_content, config)
+function M.apply_collapse(bufnr, if_node, _, return_content, config)
 	local if_start_row, _, if_end_row, _ = if_node:range()
 
 	-- check if cursor is inside this block and reveal_on_cursor is enabled
@@ -101,79 +101,6 @@ function M.apply_collapse(bufnr, if_node, collapse_node, return_content, config)
 		virt_text = { { virtual_text_string, config.highlight_group } },
 		virt_text_pos = "inline",
 	})
-end
-
---- Smart cursor movement that skips concealed lines
---- @param direction string The direction to move ("up" or "down")
-function M.move_cursor_skip_concealed(direction)
-	local bufnr = vim.api.nvim_get_current_buf()
-	local cursor = vim.api.nvim_win_get_cursor(0)
-	local row = cursor[1] - 1 -- Convert to 0-indexed
-	local col = cursor[2]
-	local max_row = vim.api.nvim_buf_line_count(bufnr) - 1
-
-	if direction == "down" then
-		row = row + 1
-	elseif direction == "up" then
-		row = row - 1
-	end
-
-	-- keep moving until we find a non-concealed line
-	local attempts = 0
-	local max_attempts = 100 -- prevent loop
-
-	while attempts < max_attempts and row >= 0 and row <= max_row do
-		if not utils.is_line_concealed(bufnr, row, M.namespace) then
-			-- Found a non-concealed line, move cursor there
-			vim.api.nvim_win_set_cursor(0, { row + 1, col })
-			return
-		end
-
-		-- continue moving in the same direction
-		if direction == "down" then
-			row = row + 1
-		elseif direction == "up" then
-			row = row - 1
-		end
-
-		attempts = attempts + 1
-	end
-
-	-- if we couldn't find a non-concealed line, just move normally
-	if direction == "down" then
-		vim.cmd("normal! j")
-	elseif direction == "up" then
-		vim.cmd("normal! k")
-	end
-end
-
---- Setup buffer mappings to skip concealed lines
---- @param bufnr number The buffer number
---- @param config table The plugin configuration
-function M.setup_keymaps(bufnr, config)
-	if not config.keymaps or config.keymaps == false then
-		return
-	end
-
-	local opts = { buffer = bufnr, silent = true, noremap = true }
-
-	-- helper function to set up keymaps (handles both string and table)
-	local function setup_key(keys, direction)
-		if not keys then
-			return
-		end
-
-		local key_list = type(keys) == "table" and keys or { keys }
-
-		for _, key in ipairs(key_list) do
-			vim.keymap.set("n", key, function()
-				M.move_cursor_skip_concealed(direction)
-			end, opts)
-		end
-	end
-
-	setup_key(config.keymaps.move_down, "down")
-	setup_key(config.keymaps.move_up, "up")
 end
 
 --- Process buffer and apply collapses to error handling blocks
@@ -253,8 +180,6 @@ function M.process_buffer(bufnr, config)
 			end
 		end
 	end
-
-	M.setup_keymaps(bufnr, config)
 end
 
 return M

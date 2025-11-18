@@ -32,12 +32,6 @@ M.defaults = {
 		"InsertLeave",
 	},
 
-	-- key mappings to skip over concealed lines. can be a string or a table of strings
-	keymaps = {
-		move_down = "j",
-		move_up = "k",
-	},
-
 	-- reveal concealed lines when cursor is on the if err != nil line,
 	-- allows you to inspect the error handling by hovering over the collapsed line
 	reveal_on_cursor = true,
