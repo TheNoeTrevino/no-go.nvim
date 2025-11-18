@@ -11,7 +11,7 @@ making your code more readable while keeping the semantics of error handling vis
 
 ## Motivation
 
-Go's error handing is explicit and unmagical (awesome!), but that comes with verbosity a tendency to create bloat in your code (sad!).
+Go's error handing is explicit and unmagical (awesome!), but that comes with verbosity and a tendency to create bloat in your code (sad!).
 
 After doing research and finding from [this issue](https://github.com/golang/vscode-go/issues/2311) that GoLand has implemented their own solution, 
 I knew I wanted to create something similar in Neovim. 
@@ -98,14 +98,6 @@ require("no-go").setup({ -- required w/o lazy.nvim
     "TextChanged",
     "TextChangedI",
     "InsertLeave",
-  },
-
-  -- Key mappings to skip over concealed lines
-  -- The plugin automatically remaps these keys to skip concealed error blocks
-  -- If you want to set them to something else, you will have to set them here. Or false to disable 
-  keymaps = {
-    move_down = "j", -- Key to move down and skip concealed lines
-    move_up = "k",   -- Key to move up and skip concealed lines
   },
 
   -- Reveal concealed lines when cursor is on the if err != nil line
