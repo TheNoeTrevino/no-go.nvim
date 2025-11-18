@@ -30,6 +30,17 @@ I knew I wanted to create something similar in Neovim.
 - Neovim >= 0.11.0 (for `conceal_lines` support to completely hide error handling blocks)
 - [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) with Go parser installed
 
+### Optional 
+
+Don't see the proper Treesitter parsing? 
+
+- Treesitter prioritized over LSP Semantic Tokens.
+
+``` lua
+vim.highlight.priorities.semantic_tokens = 95 -- default is 125
+vim.highlight.priorities.treesitter = 100 -- default is 100
+```
+
 ## Installation
 
 ### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
