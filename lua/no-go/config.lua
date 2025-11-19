@@ -17,6 +17,15 @@ M.defaults = {
 		suffix = "",
 	},
 
+	-- virtual text for collapsed import blocks
+	import_virtual_text = {
+		prefix = " ",
+		suffix = "  ",
+	},
+
+	-- enable import folding
+	fold_imports = true,
+
 	highlight_group = "NoGoZone",
 
 	highlight = {
