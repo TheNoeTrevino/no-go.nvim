@@ -82,6 +82,13 @@ require("no-go").setup({ -- required w/o lazy.nvim
     suffix = "",
   },
 
+  -- virtual text for collapsed import blocks
+  -- Built as: prefix + content (num of packages) + suffix
+  import_virtual_text = { -- e.g. ' 2  '
+    prefix = " ",
+    suffix = "  ",
+  },
+
   -- Highlight group for the collapsed text
   highlight_group = "NoGoZone",
 

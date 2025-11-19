@@ -112,6 +112,71 @@ function M.apply_collapse(bufnr, if_node, _, return_content, config)
 	})
 end
 
+--- Apply virtual text and concealment to collapse an import block
+--- @param bufnr number The buffer number
+--- @param import_node TSNode The import statement node
+--- @param collapse_node TSNode The import_spec_list node to collapse
+--- @param config table The plugin configuration
+function M.apply_import_collapse(bufnr, import_node, collapse_node, config)
+	local import_start_row, _, import_end_row, _ = import_node:range()
+
+	-- check if cursor is inside this block and reveal_on_cursor is enabled
+	if config.reveal_on_cursor then
+		local wins = vim.fn.win_findbuf(bufnr)
+		for _, win in ipairs(wins) do
+			local cursor = vim.api.nvim_win_get_cursor(win)
+			local cursor_row = cursor[1] - 1
+
+			if cursor_row >= import_start_row and cursor_row <= import_end_row then
+				return
+			end
+		end
+	end
+
+	local paren_start_col = utils.find_opening_pair(bufnr, import_start_row, "(")
+	if not paren_start_col then
+		return
+	end
+
+	local paren_end_col = utils.find_closing_pair(bufnr, import_end_row, ")")
+	if not paren_end_col then
+		return
+	end
+
+	-- Conceal from ( to end of the import line
+	local import_line = vim.api.nvim_buf_get_lines(bufnr, import_start_row, import_start_row + 1, false)[1]
+	if import_line then
+		vim.api.nvim_buf_set_extmark(bufnr, M.namespace, import_start_row, paren_start_col, {
+			end_row = import_start_row,
+			end_col = #import_line,
+			conceal = "",
+		})
+	end
+
+	-- hide all intermediate lines
+	if import_end_row > import_start_row then
+		vim.api.nvim_buf_set_extmark(bufnr, M.namespace, import_start_row + 1, 0, {
+			end_row = import_end_row,
+			end_col = 0,
+			conceal_lines = "",
+		})
+	end
+
+	-- Count import packages
+	local import_count = 0
+	for child in collapse_node:iter_children() do
+		if child:type() == "import_spec" then
+			import_count = import_count + 1
+		end
+	end
+
+	local virtual_text_string = config.import_virtual_text.prefix .. import_count .. config.import_virtual_text.suffix
+	vim.api.nvim_buf_set_extmark(bufnr, M.namespace, import_start_row, paren_start_col, {
+		virt_text = { { virtual_text_string, config.highlight_group } },
+		virt_text_pos = "inline",
+	})
+end
+
 --- Process buffer and apply collapses to error handling blocks
 --- @param bufnr number|nil The buffer number (defaults to current buffer)
 --- @param config table The plugin configuration
@@ -149,7 +214,7 @@ function M.process_buffer(bufnr, config)
 
 	local root = tree:root()
 
-	-- iterate query matches
+	-- iterate err query matches
 	for id, node, _ in error_query:iter_captures(root, bufnr, 0, -1) do
 		local capture_name = error_query.captures[id]
 
@@ -186,6 +251,32 @@ function M.process_buffer(bufnr, config)
 				end
 
 				M.apply_collapse(bufnr, node, collapse_block_node, return_content, config)
+			end
+		end
+	end
+
+	-- iterate import query matches, if enabled
+	if config.fold_imports then
+		local import_query = M.get_import_query()
+		if import_query then
+			for id, node, _ in import_query:iter_captures(root, bufnr, 0, -1) do
+				local capture_name = import_query.captures[id]
+
+				if capture_name == "import_statement" then
+					local collapse_block_node = nil
+
+					for child_id, child_node, _ in import_query:iter_captures(node, bufnr, 0, -1) do
+						local child_capture_name = import_query.captures[child_id]
+
+						if child_capture_name == "collapse_block" then
+							collapse_block_node = child_node
+						end
+					end
+
+					if collapse_block_node then
+						M.apply_import_collapse(bufnr, node, collapse_block_node, config)
+					end
+				end
 			end
 		end
 	end

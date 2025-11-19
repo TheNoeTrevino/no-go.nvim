@@ -32,7 +32,7 @@ function M.find_opening_pair(bufnr, if_start_row, char)
 		return nil
 	end
 
-	local brace_col = line:find(char)
+	local brace_col = line:find(char, 1, true)
 	if brace_col then
 		return brace_col - 1
 	end
