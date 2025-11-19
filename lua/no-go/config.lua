@@ -24,7 +24,7 @@ M.defaults = {
 	},
 
 	-- enable import folding
-	fold_imports = true,
+	fold_imports = false,
 
 	highlight_group = "NoGoZone",
 
