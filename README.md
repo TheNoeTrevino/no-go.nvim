@@ -82,6 +82,9 @@ require("no-go").setup({ -- required w/o lazy.nvim
     suffix = "",
   },
 
+  -- disable by default
+	fold_imports = false,
+
   -- virtual text for collapsed import blocks
   -- Built as: prefix + content (num of packages) + suffix
   import_virtual_text = { -- e.g. ' 2  '
