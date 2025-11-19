@@ -1,32 +1,41 @@
 local M = {}
 local utils = require("no-go.utils")
+local queries = require("no-go.queries")
 
 M.namespace = vim.api.nvim_create_namespace("no-go")
 
-M.query_string = [[
-(
-  (if_statement
-    condition: (binary_expression
-      left: (identifier) @err_identifier)
-    consequence: (block
-      (statement_list
-        (return_statement
-          (expression_list
-            (identifier) @return_identifier)?)))) @collapse_block) @if_statement
-]]
-
 --- Parse and return the Treesitter query for Go error handling patterns
---- @return vim.treesitter.Query|nil The parsed query or nil if parsing fails
-function M.get_query()
+--- @return vim.treesitter.Query|nil query The parsed query or nil if parsing fails
+function M.get_error_query()
 	local has_parser = pcall(vim.treesitter.language.inspect, "go")
 
-	local ok, query = pcall(vim.treesitter.query.parse, "go", M.query_string)
+	local ok, query = pcall(vim.treesitter.query.parse, "go", queries.error_query)
 	if not ok then
 		if not has_parser then
 			vim.notify("no-go.nvim: Go parser not found. Install it with :TSInstall go", vim.log.levels.ERROR)
 		else
 			vim.notify(
-				"no-go.nvim: Failed to parse query. Try updating the parser with :TSUpdate go",
+				"no-go.nvim: Failed to parse error query. Try updating the parser with :TSUpdate go",
+				vim.log.levels.ERROR
+			)
+		end
+		return nil
+	end
+	return query
+end
+
+--- Parse and return the Treesitter query for Go import blocks
+--- @return vim.treesitter.Query|nil query The parsed query or nil if parsing fails
+function M.get_import_query()
+	local has_parser = pcall(vim.treesitter.language.inspect, "go")
+
+	local ok, query = pcall(vim.treesitter.query.parse, "go", queries.import_query)
+	if not ok then
+		if not has_parser then
+			vim.notify("no-go.nvim: Go parser not found. Install it with :TSInstall go", vim.log.levels.ERROR)
+		else
+			vim.notify(
+				"no-go.nvim: Failed to parse import query. Try updating the parser with :TSUpdate go",
 				vim.log.levels.ERROR
 			)
 		end
@@ -123,8 +132,8 @@ function M.process_buffer(bufnr, config)
 		vim.wo.concealcursor = "nvic" -- conceal in all modes
 	end)
 
-	local query = M.get_query()
-	if not query then
+	local error_query = M.get_error_query()
+	if not error_query then
 		return
 	end
 
@@ -141,8 +150,8 @@ function M.process_buffer(bufnr, config)
 	local root = tree:root()
 
 	-- iterate query matches
-	for id, node, _ in query:iter_captures(root, bufnr, 0, -1) do
-		local capture_name = query.captures[id]
+	for id, node, _ in error_query:iter_captures(root, bufnr, 0, -1) do
+		local capture_name = error_query.captures[id]
 
 		if capture_name == "if_statement" then -- checking capture group
 			local err_identifier_node = nil
@@ -150,8 +159,8 @@ function M.process_buffer(bufnr, config)
 			local return_identifier_node = nil
 
 			-- gets the nodes we need to make the virtual text, and what we will collapse
-			for child_id, child_node, _ in query:iter_captures(node, bufnr, 0, -1) do
-				local child_capture_name = query.captures[child_id]
+			for child_id, child_node, _ in error_query:iter_captures(node, bufnr, 0, -1) do
+				local child_capture_name = error_query.captures[child_id]
 
 				if child_capture_name == "err_identifier" then
 					err_identifier_node = child_node
