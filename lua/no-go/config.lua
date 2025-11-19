@@ -52,6 +52,11 @@ end
 
 --- Setup the NoGoZone highlight group
 function M.setup_highlight()
+	-- dont override users highlight group
+	if M.options.highlight_group ~= "NoGoZone" then
+		return
+	end
+
 	local hl = M.options.highlight
 	local hl_def = {}
 
@@ -63,7 +68,6 @@ function M.setup_highlight()
 		hl_def.fg = hl.fg
 	end
 
-	-- only set if not already defined by user's colorscheme
 	vim.api.nvim_set_hl(0, M.options.highlight_group, hl_def)
 end
 
