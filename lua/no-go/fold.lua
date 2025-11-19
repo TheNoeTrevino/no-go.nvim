@@ -75,12 +75,12 @@ function M.apply_collapse(bufnr, if_node, _, return_content, config)
 		end
 	end
 
-	local brace_start_col = utils.find_opening_brace(bufnr, if_start_row)
+	local brace_start_col = utils.find_opening_pair(bufnr, if_start_row, "{")
 	if not brace_start_col then
 		return
 	end
 
-	local brace_end_col = utils.find_closing_brace(bufnr, if_end_row)
+	local brace_end_col = utils.find_closing_pair(bufnr, if_end_row, "}")
 	if not brace_end_col then
 		return
 	end

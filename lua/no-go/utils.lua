@@ -24,14 +24,15 @@ end
 --- Find the position of the opening brace on the if line
 --- @param bufnr number The buffer number
 --- @param if_start_row number The row number of the if statement
+--- @param char string The character to detect (e.g., "{", "(")
 --- @return number|nil The column position of the opening brace (0-indexed), or nil if not found
-function M.find_opening_brace(bufnr, if_start_row)
+function M.find_opening_pair(bufnr, if_start_row, char)
 	local line = vim.api.nvim_buf_get_lines(bufnr, if_start_row, if_start_row + 1, false)[1]
 	if not line then
 		return nil
 	end
 
-	local brace_col = line:find("{")
+	local brace_col = line:find(char)
 	if brace_col then
 		return brace_col - 1
 	end
@@ -41,8 +42,9 @@ end
 --- Find the position of the closing brace
 --- @param bufnr number The buffer number
 --- @param if_end_row number The row number of the closing brace
+--- @param char string The character to detect (e.g., "}", ")")
 --- @return number|nil The column position of the closing brace (0-indexed), or nil if not found
-function M.find_closing_brace(bufnr, if_end_row)
+function M.find_closing_pair(bufnr, if_end_row, char)
 	local line = vim.api.nvim_buf_get_lines(bufnr, if_end_row, if_end_row + 1, false)[1]
 	if not line then
 		return nil
@@ -50,7 +52,7 @@ function M.find_closing_brace(bufnr, if_end_row)
 
 	local brace_col = nil
 	for i = #line, 1, -1 do
-		if line:sub(i, i) == "}" then
+		if line:sub(i, i) == char then
 			brace_col = i - 1 -- Convert to 0-indexed
 			break
 		end
