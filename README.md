@@ -24,6 +24,7 @@ I knew I wanted to create something similar in Neovim.
 - Only collapses blocks where the variable is named `err`, or the user-defined identifiers
 - Customizable highlight colors and virtual text
 - Text concealment, no folding
+- Optionally, conceal imports as well (disabled by default)
 
 ## Requirements
 
@@ -113,6 +114,15 @@ require("no-go").setup({ -- required w/o lazy.nvim
   -- Reveal concealed lines when cursor is on the if err != nil line
   -- This allows you to inspect the error handling by hovering over the collapsed line
   reveal_on_cursor = true,
+
+	-- smart navigation keys (only used when reveal_on_cursor is false)
+	-- these keys will skip over concealed blocks
+	-- set to false to disable smart navigation entirely
+	-- i personally personally use jkl; so these would be different for me. 
+	keys = {
+		down = "j",
+		up = "k",
+	},
 })
 ```
 
@@ -147,6 +157,12 @@ https://github.com/user-attachments/assets/b9e336c7-fedc-4847-8960-5b9a527dd050
 > PLEASE note that if you disable `reveal_on_cursor`, you MUST manually toggle concealment (like the video above)
 > using the provided commands to access the error handling!
 > Though, it is nice when you only want to view the happy path.
+
+## Import Folding 
+
+Fold imports, and include the import count. 
+
+TODO: insert image here
 
 ## Commands
 
