@@ -162,7 +162,8 @@ https://github.com/user-attachments/assets/b9e336c7-fedc-4847-8960-5b9a527dd050
 
 Fold imports, and include the import count. 
 
-TODO: insert image here
+<img width="283" height="58" alt="2025-11-21-214643_hyprshot" src="https://github.com/user-attachments/assets/210b5d57-a432-4844-bba3-abbd2ba05fd5" />
+
 
 ## Commands
 
