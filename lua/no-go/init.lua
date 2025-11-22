@@ -2,6 +2,7 @@ local M = {}
 
 local config = require("no-go.config")
 local fold = require("no-go.fold")
+local utils = require("no-go.utils")
 
 -- Track plugin initialization
 M.initialized = false
@@ -12,11 +13,59 @@ M.augroup = nil
 -- Global enabled state (controls whether folding happens at all)
 M.is_globally_enabled = true
 
--- Track buffers where the plugin is explicitly disabled
+-- these vars are for tracking per buffer enabled and disabled states
 M.disabled_buffers = {}
 
--- Track buffers where the plugin is explicitly enabled (overrides global disabled state)
 M.enabled_buffers = {}
+
+M.keymap_buffers = {}
+
+--- these keymaps skip over concealed lines using direct cursor movement
+--- only set up when reveal_on_cursor is false!
+--- @param bufnr number The buffer number
+--- @param opts table The plugin configuration
+local function setup_keymaps(bufnr, opts)
+	if M.keymap_buffers[bufnr] then
+		return
+	end
+
+	-- only set smart keymaps when reveal_on_cursor is disabled
+	if opts.reveal_on_cursor then
+		return
+	end
+
+	-- if user puts in false, for some reason
+	if not opts.keys then
+		return
+	end
+
+	local namespace = fold.namespace
+
+	if opts.keys.down then
+		vim.keymap.set({ "n", "x", "o" }, opts.keys.down, function()
+			local lines = utils.smart_down_lines(vim.v.count1, namespace)
+			if lines > 0 then
+				local cursor = vim.api.nvim_win_get_cursor(0)
+				local max_line = vim.api.nvim_buf_line_count(0)
+				local new_line = math.min(cursor[1] + lines, max_line)
+				vim.api.nvim_win_set_cursor(0, { new_line, cursor[2] })
+			end
+		end, { buffer = bufnr, desc = "Smart down (skip concealed)" })
+	end
+
+	if opts.keys.up then
+		vim.keymap.set({ "n", "x", "o" }, opts.keys.up, function()
+			local lines = utils.smart_up_lines(vim.v.count1, namespace)
+			if lines > 0 then
+				local cursor = vim.api.nvim_win_get_cursor(0)
+				local new_line = math.max(cursor[1] - lines, 1)
+				vim.api.nvim_win_set_cursor(0, { new_line, cursor[2] })
+			end
+		end, { buffer = bufnr, desc = "Smart up (skip concealed)" })
+	end
+
+	M.keymap_buffers[bufnr] = true
+end
 
 --- Setup the plugin with user configuration
 --- @param user_config table|nil Optional user configuration to override defaults
@@ -35,6 +84,8 @@ function M.setup(user_config)
 		group = M.augroup,
 		pattern = "*.go",
 		callback = function(args)
+			setup_keymaps(args.buf, opts)
+
 			if M.disabled_buffers[args.buf] then
 				return
 			end
@@ -90,6 +141,7 @@ function M.setup(user_config)
 		local current_buf = vim.api.nvim_get_current_buf()
 		local ft = vim.api.nvim_get_option_value("filetype", { buf = current_buf })
 		if ft == "go" then
+			setup_keymaps(current_buf, opts)
 			fold.process_buffer(current_buf, opts)
 		end
 	end

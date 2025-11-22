@@ -108,4 +108,67 @@ function M.is_line_concealed(bufnr, row, namespace)
 	return false
 end
 
+--- get concealed block range containing the row param
+--- @param bufnr number The buffer number
+--- @param row number The row number to check (0-indexed)
+--- @param namespace number The namespace ID
+--- @return table|nil Table with start_row and end_row (0-indexed), or nil if not concealed
+function M.get_concealed_range(bufnr, row, namespace)
+	local marks = vim.api.nvim_buf_get_extmarks(bufnr, namespace, 0, -1, { details = true })
+
+	for _, mark in ipairs(marks) do
+		local start_row = mark[2]
+		local details = mark[4]
+
+		if details and details.conceal_lines and details.end_row then
+			local end_row = details.end_row
+
+			if row >= start_row and row <= end_row then
+				return { start_row = start_row, end_row = end_row }
+			end
+		end
+	end
+
+	return nil
+end
+
+--- lines to skip for smart downward motion
+--- @param count number The motion count (vim.v.count1)
+--- @param namespace number The namespace ID
+--- @return number The number of buffer lines to move
+function M.smart_down_lines(count, namespace)
+	local bufnr = vim.api.nvim_get_current_buf()
+	local current_line = vim.fn.line(".")
+	local max_line = vim.fn.line("$")
+
+	local target_line = math.min(current_line + count, max_line)
+
+	-- check if target line lands inside a concealed block
+	local range = M.get_concealed_range(bufnr, target_line - 1, namespace) -- -1 for 0-indexed
+	if range then
+		target_line = math.min(range.end_row + 2, max_line) -- +2: end_row is 0-indexed, +1 for 1-indexed, +1 for line after
+	end
+
+	return target_line - current_line
+end
+
+--- lines to skip for smart upward motion
+--- @param count number The motion count (vim.v.count1)
+--- @param namespace number The namespace ID
+--- @return number The number of buffer lines to move (positive value)
+function M.smart_up_lines(count, namespace)
+	local bufnr = vim.api.nvim_get_current_buf()
+	local current_line = vim.fn.line(".")
+	local target_line = math.max(current_line - count, 1)
+
+	-- check if target line lands inside a concealed block
+	local range = M.get_concealed_range(bufnr, target_line - 1, namespace) -- -1 for 0-indexed
+	if range then
+		-- jump to the line before the concealed block (start_row is 0-indexed, lol)
+		target_line = math.max(range.start_row, 1) -- start_row in 0-indexed = line before block in 1-indexed
+	end
+
+	return current_line - target_line
+end
+
 return M
