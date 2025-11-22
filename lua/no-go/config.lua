@@ -44,6 +44,14 @@ M.defaults = {
 	-- reveal concealed lines when cursor is on the if err != nil line,
 	-- allows you to inspect the error handling by hovering over the collapsed line
 	reveal_on_cursor = true,
+
+	-- smart navigation keys (only used when reveal_on_cursor is false)
+	-- these keys will skip over concealed blocks
+	-- set to false to disable smart navigation entirely
+	keys = {
+		down = "j",
+		up = "k",
+	},
 }
 
 -- current configuration (will be merged with user config)
