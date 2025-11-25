@@ -31,3 +31,29 @@ end, { desc = "Toggle no-go for current buffer only" })
 vim.api.nvim_create_user_command("NoGoRefresh", function()
 	require("no-go").refresh()
 end, { desc = "Refresh no-go error collapsing for current buffer" })
+
+-- Reveal on cursor global commands
+vim.api.nvim_create_user_command("NoGoToggleReveal", function()
+	require("no-go").toggle_reveal_on_cursor()
+end, { desc = "Toggle reveal_on_cursor globally (all buffers)" })
+
+vim.api.nvim_create_user_command("NoGoEnableReveal", function()
+	require("no-go").enable_reveal_on_cursor()
+end, { desc = "Enable reveal_on_cursor globally (all buffers)" })
+
+vim.api.nvim_create_user_command("NoGoDisableReveal", function()
+	require("no-go").disable_reveal_on_cursor()
+end, { desc = "Disable reveal_on_cursor globally (all buffers)" })
+
+-- Reveal on cursor buffer-specific commands
+vim.api.nvim_create_user_command("NoGoBufToggleReveal", function()
+	require("no-go").toggle_reveal_on_cursor_buffer()
+end, { desc = "Toggle reveal_on_cursor for current buffer only" })
+
+vim.api.nvim_create_user_command("NoGoBufEnableReveal", function()
+	require("no-go").enable_reveal_on_cursor_buffer()
+end, { desc = "Enable reveal_on_cursor for current buffer only" })
+
+vim.api.nvim_create_user_command("NoGoBufDisableReveal", function()
+	require("no-go").disable_reveal_on_cursor_buffer()
+end, { desc = "Disable reveal_on_cursor for current buffer only" })

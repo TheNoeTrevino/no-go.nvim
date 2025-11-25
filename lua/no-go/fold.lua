@@ -56,11 +56,12 @@ end
 --- @param _ TSNode The block node to collapse
 --- @param return_content string|nil The identifier from the return statement (e.g., "err"), or nil
 --- @param config table The plugin configuration
-function M.apply_collapse(bufnr, if_node, _, return_content, config)
+--- @param reveal_on_cursor_active boolean Whether reveal_on_cursor is active for this buffer
+function M.apply_collapse(bufnr, if_node, _, return_content, config, reveal_on_cursor_active)
 	local if_start_row, _, if_end_row, _ = if_node:range()
 
 	-- check if cursor is inside this block and reveal_on_cursor is enabled
-	if config.reveal_on_cursor then
+	if reveal_on_cursor_active then
 		-- get all windows showing this buffer
 		local wins = vim.fn.win_findbuf(bufnr)
 		for _, win in ipairs(wins) do
@@ -117,11 +118,12 @@ end
 --- @param import_node TSNode The import statement node
 --- @param collapse_node TSNode The import_spec_list node to collapse
 --- @param config table The plugin configuration
-function M.apply_import_collapse(bufnr, import_node, collapse_node, config)
+--- @param reveal_on_cursor_active boolean Whether reveal_on_cursor is active for this buffer
+function M.apply_import_collapse(bufnr, import_node, collapse_node, config, reveal_on_cursor_active)
 	local import_start_row, _, import_end_row, _ = import_node:range()
 
 	-- check if cursor is inside this block and reveal_on_cursor is enabled
-	if config.reveal_on_cursor then
+	if reveal_on_cursor_active then
 		local wins = vim.fn.win_findbuf(bufnr)
 		for _, win in ipairs(wins) do
 			local cursor = vim.api.nvim_win_get_cursor(win)
@@ -180,7 +182,8 @@ end
 --- Process buffer and apply collapses to error handling blocks
 --- @param bufnr number|nil The buffer number (defaults to current buffer)
 --- @param config table The plugin configuration
-function M.process_buffer(bufnr, config)
+--- @param reveal_on_cursor_active boolean Whether reveal_on_cursor is active for this buffer
+function M.process_buffer(bufnr, config, reveal_on_cursor_active)
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
 
 	-- check if buffer is a go file early
@@ -250,7 +253,7 @@ function M.process_buffer(bufnr, config)
 					return_content = vim.treesitter.get_node_text(return_identifier_node, bufnr)
 				end
 
-				M.apply_collapse(bufnr, node, collapse_block_node, return_content, config)
+				M.apply_collapse(bufnr, node, collapse_block_node, return_content, config, reveal_on_cursor_active)
 			end
 		end
 	end
@@ -274,7 +277,7 @@ function M.process_buffer(bufnr, config)
 					end
 
 					if collapse_block_node then
-						M.apply_import_collapse(bufnr, node, collapse_block_node, config)
+						M.apply_import_collapse(bufnr, node, collapse_block_node, config, reveal_on_cursor_active)
 					end
 				end
 			end
