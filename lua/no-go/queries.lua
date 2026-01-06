@@ -1,15 +1,13 @@
 local M = {}
 
 M.error_query = [[
-(
-  (if_statement
-    condition: (binary_expression
-      left: (identifier) @err_identifier)
-    consequence: (block
-      (statement_list
-        (return_statement
-          (expression_list
-            (identifier) @return_identifier)?)))) @collapse_block) @if_statement
+(if_statement
+  condition: (binary_expression
+    left: (identifier) @err_identifier)
+  consequence: (block
+    (return_statement
+      (expression_list
+        (identifier) @return_identifier)?)) @collapse_block) @if_statement
 ]]
 
 M.import_query = [[
