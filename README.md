@@ -1,5 +1,8 @@
 # no-go.nvim
 
+> Development happens at https://git.thenoetrevino.com/noe.trevino/no-go.nvim.
+> GitHub is a read-only mirror. Please open issues and pull requests there.
+
 Verbose error handling in Go? That's a no-go from me!
 
 A Neovim plugin that intelligently collapses Go error handling blocks into a single line,
